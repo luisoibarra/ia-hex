@@ -6,6 +6,7 @@
 
 from game_logic import *
 from minimax import minimax
+from DAL_minimax import alpha_beta
 
 # game_logic
 #
@@ -35,7 +36,8 @@ def play(game, player):
 	# Code Here
 	# Random player implementation (just delete it)
 
-	return minimax(game, player, 3, heuristic, moves)
+	# return minimax(game, player, 3, heuristic, moves)
+	return alpha_beta(game, player, 3, heuristic, moves)
 
 
 def moves(game, player):
