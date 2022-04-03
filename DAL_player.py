@@ -4,6 +4,7 @@
 #				two integers who represent a valid move on
 #				the game.
 
+from DAL_utils import node_heuristic, rank
 from game_logic import *
 from DAL_minimax import minimax, alpha_beta
 
@@ -33,9 +34,8 @@ from DAL_minimax import minimax, alpha_beta
 
 def play(game, player):
 	# Code Here
-	# Random player implementation (just delete it)
-
-	return minimax(game, player, 3, heuristic, moves)
+	return alpha_beta(game, player, 3, heuristic, moves)
+	# return alpha_beta(game, player, 3, heuristic, ranked_moves)
 
 
 def moves(game, player):
@@ -44,9 +44,12 @@ def moves(game, player):
 			if game[x, y] == EMPTY:
 				yield (x, y)
 
+def ranked_moves(game, player):
+	moves = rank(game, player)
+	return moves[:8]
 
 def heuristic(game, player):
 	# Code Here
-	return 0
+	return node_heuristic(game, player)
 
 

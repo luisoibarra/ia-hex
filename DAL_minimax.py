@@ -89,7 +89,6 @@ def minplay_alpha_beta(game, play, player, depth, h, moves, alpha, beta):
     """Retorna la mejor jugada para el jugador contrario"""
     best = None
     best_value = oo
-    beta = -oo
 
     if game.winner() != EMPTY:
         return play, 1 if game.winner() != player else 0

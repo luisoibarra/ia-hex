@@ -5,7 +5,8 @@ SIZE = 4		# Size of the board
 
 PLAYERS = [	'random_player',
 			'rush_player',
-			'minimax_player',
+			# 'minimax_player',
+			'DAL_player'
 			]
 
 #TODO: MAX_TIME Not implemented yet
