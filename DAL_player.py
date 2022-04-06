@@ -4,7 +4,7 @@
 #				two integers who represent a valid move on
 #				the game.
 
-from DAL_utils import node_heuristic, rank
+from DAL_utils import closest_path_heuristic, node_heuristic, rank
 from game_logic import *
 from DAL_minimax import minimax, alpha_beta
 
@@ -50,6 +50,7 @@ def ranked_moves(game, player):
 
 def heuristic(game, player):
 	# Code Here
-	return node_heuristic(game, player)
+	# return node_heuristic(game, player)
+	return closest_path_heuristic(game, player)
 
 

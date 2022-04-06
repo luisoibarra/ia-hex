@@ -175,20 +175,24 @@ def node_heuristic(current_game: Game, player):
                 else:
                     black.add((x,y))
 
+    return connected_nodes + len(row_columns) + 1/distance_heuristic(white, black)# + closest_path_heuristic(current_game, player)
+
+def distance_heuristic(white:set, black:set):
     # Distance between nodes
     distance = 0
     for wx,wy in white:
         for bx,by in black:
             distance += cubic_distance(wx,wy,bx,by)
+    return distance
 
+def closest_path_heuristic(current_game: Game, player):
     # How much is left to win
-    # nodes_left = 0
-    # current_game = current_game.__clone__()
-    # current_game.turn = (current_game.turn+1)%2
-    # path = a_star_hex(current_game, get_next_actions, initial_position(current_game, player), cubic_distance_heuristic, a_start_goal)
-    # for _,action in path:
-    #     if current_game[action] == EMPTY:
-    #         nodes_left += 1
+    nodes_left = 0
+    current_game = current_game.__clone__()
+    current_game.turn = (current_game.turn+1)%2
+    path = a_star_hex(current_game, get_next_actions, initial_position(current_game, player), cubic_distance_heuristic, a_start_goal)
+    for _,action in path:
+        if current_game[action] == EMPTY:
+            nodes_left += 1
 
-
-    return connected_nodes + len(row_columns) + 1/distance# + log2(1/nodes_left)
+    return 1/nodes_left

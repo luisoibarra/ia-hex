@@ -32,7 +32,7 @@ Para la explicación se asumirá que el jugador a maximizar es el blanco, lo que
 
 - Cantidad de nodos en las componentes conexas laterales (h1): Esta heurística cuenta los nodos conectados a los laterales, mientras más nodos estén conectados a estos mejor la puntuación. Esta heurística tiene como inconveniente que las jugadas en vertical sobre una columna ya tomada puntúa igual que una jugada que disminuya la distancia entre los laterales
 - Cantidad de columnas ocupadas (h2): Esta heurística cuenta la cantidad de columnas ocupadas, es un poderoso criterio si se combina con h1 ya que el defecto de esta es que no garantiza la conexidad, lo cual es garantizado por h1.
-- Nodos faltantes para ganar (h3): Esta heurística calcula el camino por donde se tienen que poner menos nodos para ganar y devuelve esta cantidad, se usa principalemnte para desambiguar en algunos casos sobre donde poner nodos en tomando en cuenta solamente h1 y h2.
+- Nodos faltantes para ganar (h3): Esta heurística calcula el camino por donde se tienen que poner menos nodos para ganar y devuelve esta cantidad, se usa principalemnte para desambiguar en algunos casos sobre donde poner nodos en tomando en cuenta solamente h1 y h2. La implementación de esta usa A*.
 - Distancia entre nodos blancos y negros (h4): Esta heurística calcula la distancia entre todos los elementos blancos con todos los elementos negros. Se usa para elegir jugadas que acerquen o alejen de los nodos adversarios para entorpecer sus movimientos o dar más libertad de movimiento al jugador que la hizo.
 
 ## Resultados
@@ -44,3 +44,7 @@ La heurística formada por h1 + h2 vence sin problemas al rush_player y al rando
 ### Heurística random_player:
 
 La heurística formada por h1 + h2 + 1/h4 es vencida por el rush_player cuando el jugador implementado comienza jugando, pero es la más efectiva encontrada contra el random_player ganando 7/8 aproximadamente. 
+
+### Heurística mejor camino
+
+Esta heurística está formada por 1/h3, para potenciar la cantidad menor de nodos. Esta heurística aunque se demora un poco más que las anteriores logra vences al rush_player siempre y al random_player le gana con una probabilidad de 7/8, igualando la heurística de mejor rendimiento contra este.

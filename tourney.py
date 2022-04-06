@@ -6,7 +6,7 @@ SIZE = 4		# Size of the board
 PLAYERS = [	
 			'DAL_player',
 			'rush_player',
-	'random_player',
+			'random_player',
 			# 'minimax_player',
 			]
 
