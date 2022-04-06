@@ -1,8 +1,10 @@
 import heapq
 import itertools
+from math import log2
 from random import random
 
 from numpy import math
+from tools import oo
 from game_logic import BLACK, WHITE, Game, EMPTY
 
 class Heap:
@@ -40,11 +42,11 @@ def a_star_hex(game: Game, next_neighbours, initial_positions, heuristic, goal):
     player_turn = game.turn
     
     for initial_position in initial_positions:
-        current_game = game.clone_play(*initial_position)
+        current_game = game.clone_play(*initial_position) if game[initial_position] == EMPTY else game.__clone__()
         current_game.turn = player_turn
-        distance_from_initial[initial_position] = 0
+        distance_from_initial[initial_position] = distance = 0 if game[initial_position] != EMPTY else 1
         father_node[initial_position] = game, None
-        heap.push((heuristic(game, initial_position), initial_position, random(), current_game)) # Saving (Score, Game, Action to get there, (X,Y))
+        heap.push((distance + heuristic(game, initial_position), initial_position, random(), current_game)) # Saving (Score, Game, Action to get there, (X,Y))
 
     while heap:
         cost, action, _, current_game = heap.pop()
@@ -69,37 +71,32 @@ def a_star_hex(game: Game, next_neighbours, initial_positions, heuristic, goal):
         
     return
 
-def euclidean_heuristic(game: Game, play_made):
+def cubic_distance(x1,y1, x2,y2):
+    s1 = -x1-y1 # Axial to Cubic coordinates
+    s2 = -x2-y2
+    distance = (abs(x1 - x2) + abs(y1 - y2) + abs(s1 - s2))/2
+    return distance
+
+def cubic_distance_heuristic(game: Game, play_made):
     x,y = play_made
-    position1, position2 = game.size - 1 if game.turn == 1 else x, game.size - 1 if game.turn == 0 else y 
-    return math.sqrt((x - position1) ** 2 + (y - position2) ** 2)
+    minim = oo
+    for i in range(game.size):
+        if game.turn == 1:
+            position1 = game.size - 1
+        else:
+            position1 = i
+        if game.turn == 0:
+            position2 = game.size - 1
+        else:
+            position2 = i
+        # return math.sqrt((x - position1) ** 2 + (y - position2) ** 2)
+        distance = cubic_distance(x, y, position1, position2)
+        minim = min(minim, distance)
+    return minim
 
 def rank(game: Game, player):
 
-    def goal(game: Game):
-        """
-        A winner exists
-        """
-        return game.winner() != EMPTY
-
-    def heuristic(game:Game, position):
-        if game[position] == game.current():
-            return 0
-        else:
-            return euclidean_heuristic(game, position)
-
-    def get_next_actions(current_game: Game, action):
-        next = set()
-        # for i,j in [(i,j) for i,j in itertools.permutations(range(game.size), 2) if current_game[i,j] in [current_game.current(), EMPTY]]:
-            # next.update(pos for pos in game.neighbour(i,j) if current_game[pos] == EMPTY)
-        for i,j in [(i,j) for i,j in current_game.neighbour(*action) if current_game[i,j] in [current_game.current(), EMPTY]]:
-            next.add((i,j))
-        return next
-
-    def get_pos(i):
-        return (i if player == WHITE else 0, i if player == BLACK else 0)
-
-    path = a_star_hex(game, get_next_actions, [get_pos(i) for i in range(game.size) if game[get_pos(i)] == EMPTY], heuristic, goal)
+    path = a_star_hex(game, get_next_actions, initial_position(game, player), a_star_heuristic, a_start_goal)
 
     def action_weight(action):
         x,y = action
@@ -125,17 +122,73 @@ def rank(game: Game, player):
 
     return [y for _,y in actions_to_take]
 
+
+def a_start_goal(game: Game):
+    """
+    A winner exists
+    """
+    return game.winner() != EMPTY
+
+
+def a_star_heuristic(game:Game, position):
+    distance = cubic_distance_heuristic(game, position)
+    if game[position] == game.current():
+        return distance - 1
+    else:
+        return distance
+
+
+def initial_position(game:Game, player):
+    
+    def get_pos(i):
+        return (i if player == WHITE else 0, i if player == BLACK else 0)
+
+    return [get_pos(i) for i in range(game.size) if game[get_pos(i)] in [EMPTY, player]]
+
+def get_next_actions(current_game: Game, action):
+    next = set()
+    # for i,j in [(i,j) for i,j in itertools.permutations(range(game.size), 2) if current_game[i,j] in [current_game.current(), EMPTY]]:
+        # next.update(pos for pos in game.neighbour(i,j) if current_game[pos] == EMPTY)
+    for i,j in [(i,j) for i,j in current_game.neighbour(*action) if current_game[i,j] in [current_game.current(), EMPTY]]:
+        next.add((i,j))
+    return next
+
+
 def node_heuristic(current_game: Game, player):
     current_player_roots = [0,1] if player == WHITE else [2,3]
-    value = 0
+    connected_nodes = 0
+    white = set()
+    black = set()
     row_columns = set()
     for x in range(current_game.size):
         for y in range(current_game.size):
-            if current_game[x,y] != EMPTY:
+            item = current_game[x,y]
+            if item != EMPTY:
                 # How many nodes are connected to the edges
                 if current_game.root(current_game.position(x,y)) in [current_game.root(z) for z in current_player_roots]:
-                    value += 1
+                    connected_nodes += 1
                 # How many columns or row are used
                 if current_game[x,y] == player:
                     row_columns.add(y if player == WHITE else x)
-    return value + len(row_columns)
+                if item == WHITE:
+                    white.add((x,y))
+                else:
+                    black.add((x,y))
+
+    # Distance between nodes
+    distance = 0
+    for wx,wy in white:
+        for bx,by in black:
+            distance += cubic_distance(wx,wy,bx,by)
+
+    # How much is left to win
+    # nodes_left = 0
+    # current_game = current_game.__clone__()
+    # current_game.turn = (current_game.turn+1)%2
+    # path = a_star_hex(current_game, get_next_actions, initial_position(current_game, player), cubic_distance_heuristic, a_start_goal)
+    # for _,action in path:
+    #     if current_game[action] == EMPTY:
+    #         nodes_left += 1
+
+
+    return connected_nodes + len(row_columns) + 1/distance# + log2(1/nodes_left)

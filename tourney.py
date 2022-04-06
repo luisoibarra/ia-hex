@@ -3,10 +3,11 @@ from importlib import import_module as load
 
 SIZE = 4		# Size of the board
 
-PLAYERS = [	'random_player',
+PLAYERS = [	
+			'DAL_player',
 			'rush_player',
+	'random_player',
 			# 'minimax_player',
-			'DAL_player'
 			]
 
 #TODO: MAX_TIME Not implemented yet
